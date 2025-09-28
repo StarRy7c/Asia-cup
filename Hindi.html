@@ -1,748 +1,342 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta name="referrer" content="no-referrer">
-
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-
-    <meta http-equiv="Pragma" content="no-cache">
-
-    <meta http-equiv="Expires" content="0">
-
-    <title>Video Player | @CRIxZy</title>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" rel="stylesheet">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-
-    <style>
-
-        /* General Setup */
-
-        html, body {
-
-            box-sizing: border-box;
-
-            height: 100%;
-
-            width: 100%;
-
-            margin: 0;
-
-            padding: 0;
-
-            font-family: 'Inter', Arial, sans-serif;
-
-            background: #121212;
-
-            color: white;
-
-            text-align: center;
-
-        }
-
-        *, ::after, ::before {
-
-            box-sizing: inherit;
-
-        }
-
-
-
-        /* Video Container */
-
-        .video-container {
-
-            width: 100%;
-
-            height: 35vh;
-
-            max-height: 80vh;
-
-            background: #000;
-
-            position: relative;
-
-            overflow: hidden;
-
-        }
-
-
-
-        /* Video Element */
-
-        #video {
-
-            width: 100%;
-
-            height: 100%;
-
-            object-fit: contain;
-
-        }
-
-
-
-        /* Shaka Player Customizations */
-
-        .shaka-overflow-menu, .shaka-settings-menu { background-color: rgba(255, 0, 120, 0.9); }
-
-        .shaka-current-selection-span, .shaka-settings-menu button { color: #0fc; font-weight: 700; }
-
-        .shaka-overflow-menu button:hover, .shaka-settings-menu button:hover { background-color: #000; }
-
-        .shaka-overflow-button-label { color: #ffffe6; font-weight: 700; }
-
-        .material-icons-round { color: #e6e6e6; }
-
-        .shaka-spinner-container { display: none !important; }
-
-
-
-        /* --- New CSS for Smooth Animations --- */
-
-        .shaka-button {
-
-            transition: transform 0.2s ease, background-color 0.3s ease;
-
-        }
-
-        .shaka-button:hover {
-
-            transform: scale(1.1);
-
-            background-color: rgba(255, 255, 255, 0.1); /* light glow on hover */
-
-        }
-
-
-
-        /* Telegram Button Strip */
-
-        .telegram-btn-strip {
-
-            display: inline-block;
-
-            margin-top: 20px;
-
-            background: #0088cc;
-
-            color: #fff;
-
-            padding: 12px 28px;
-
-            border-radius: 8px;
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            text-decoration: none;
-
-            cursor: pointer;
-
-            transition: background 0.3s, transform 0.2s;
-
-        }
-
-        .telegram-btn-strip:hover {
-
-            background: #0077b6;
-
-            transform: scale(1.05);
-
-        }
-
-
-
-        /* Info Box */
-
-        .info-box {
-
-            background: #333;
-
-            color: #ffeb3b;
-
-            padding: 15px;
-
-            margin: 20px auto;
-
-            border-radius: 8px;
-
-            max-width: 500px;
-
-            font-size: 15px;
-
-            line-height: 1.5;
-
-            border: 1px solid #444;
-
-        }
-
-
-
-        /* Share Button Styles */
-
-        .direct-share-container {
-
-            display: flex;
-
-            justify-content: center;
-
-            gap: 15px;
-
-            margin: 20px auto;
-
-            padding: 0 15px;
-
-            max-width: 500px;
-
-        }
-
-
-
-        .share-option {
-
-            color: white;
-
-            text-decoration: none;
-
-            font-weight: bold;
-
-            padding: 12px 15px;
-
-            border-radius: 8px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 10px;
-
-            font-size: 14px;
-
-            transition: background-color 0.2s, transform 0.2s;
-
-            flex: 1;
-
-        }
-
-        .share-option:hover {
-
-            transform: scale(1.03);
-
-        }
-
-
-
-        .share-option.whatsapp { background-color: #25D366; }
-
-        .share-option.whatsapp:hover { background-color: #1EBE57; }
-
-        .share-option.telegram { background-color: #0088cc; }
-
-        .share-option.telegram:hover { background-color: #0077b6; }
-
-
-
-        /* Popup Styles */
-
-        .popup-overlay {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            width: 100%;
-
-            height: 100%;
-
-            background: rgba(0, 0, 0, 0.7);
-
-            display: none; /* Initially hidden */
-
-            justify-content: center;
-
-            align-items: center;
-
-            z-index: 1000;
-
-            backdrop-filter: blur(5px);
-
-        }
-
-
-
-        .popup-content {
-
-            background: #1e1e1e;
-
-            padding: 30px;
-
-            border-radius: 12px;
-
-            text-align: center;
-
-            position: relative;
-
-            width: 90%;
-
-            max-width: 350px;
-
-            border: 1px solid #444;
-
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-
-            animation: fadeIn 0.3s ease-out;
-
-        }
-
-
-
-        @keyframes fadeIn {
-
-            from { opacity: 0; transform: scale(0.9); }
-
-            to { opacity: 1; transform: scale(1); }
-
-        }
-
-
-
-        .popup-content .close-btn {
-
-            position: absolute;
-
-            top: 10px;
-
-            right: 15px;
-
-            font-size: 28px;
-
-            color: #888;
-
-            cursor: pointer;
-
-            transition: color 0.3s;
-
-        }
-
-
-
-        .popup-content .close-btn:hover {
-
-            color: #fff;
-
-        }
-
-
-
-        .popup-content svg {
-
-            width: 80px;
-
-            height: 80px;
-
-            margin-bottom: 15px;
-
-        }
-
-
-
-        .popup-content h3 {
-
-            margin-top: 0;
-
-            margin-bottom: 10px;
-
-            font-size: 22px;
-
-        }
-
-
-
-        .popup-content p {
-
-            margin-bottom: 25px;
-
-            color: #ccc;
-
-            font-size: 16px;
-
-        }
-
-
-
-        .popup-join-btn {
-
-            display: block;
-
-            width: 100%;
-
-            background: #0088cc;
-
-            color: #fff;
-
-            padding: 14px;
-
-            border-radius: 8px;
-
-            font-size: 18px;
-
-            font-weight: bold;
-
-            text-decoration: none;
-
-            transition: background 0.3s, transform 0.2s;
-
-        }
-
-
-
-        .popup-join-btn:hover {
-
-            background: #0077b6;
-
-            transform: scale(1.02);
-
-        }
-
-
-
-        .popup-already-joined {
-
-            display: block;
-
-            margin-top: 12px;
-
-            color: #aaa;
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            opacity: 0.7;
-
-            cursor: pointer;
-
-            transition: opacity 0.3s;
-
-        }
-
-
-
-        .popup-already-joined:hover {
-
-            opacity: 1;
-
-        }
-
-    </style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Video Player | @CRIxZy</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Setup */
+        html, body {
+            box-sizing: border-box;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #121212;
+            color: white;
+            text-align: center;
+        }
+        *, ::after, ::before {
+            box-sizing: inherit;
+        }
+
+        /* Video Container */
+        .video-container {
+            width: 100%;
+            height: 35vh; 
+            max-height: 80vh;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Video Element */
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Shaka Player Customizations */
+        .shaka-overflow-menu, .shaka-settings-menu { background-color: rgba(255, 0, 120, 0.9); }
+        .shaka-current-selection-span, .shaka-settings-menu button { color: #0fc; font-weight: 700; }
+        .shaka-overflow-menu button:hover, .shaka-settings-menu button:hover { background-color: #000; }
+        .shaka-overflow-button-label { color: #ffffe6; font-weight: 700; }
+        .material-icons-round { color: #e6e6e6; }
+        .shaka-spinner-container { display: none !important; }
+
+        /* Telegram Button Strip */
+        .telegram-btn-strip {
+          display: inline-block;
+          margin-top: 20px;
+          background: #0088cc;
+          color: #fff;
+          padding: 12px 28px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: bold;
+          text-decoration: none;
+          cursor: pointer;
+          transition: background 0.3s, transform 0.2s;
+        }
+        .telegram-btn-strip:hover {
+          background: #0077b6;
+          transform: scale(1.05);
+        }
+
+        /* Info Box */
+        .info-box {
+          background: #333;
+          color: #ffeb3b;
+          padding: 15px;
+          margin: 20px auto;
+          border-radius: 8px;
+          max-width: 500px;
+          font-size: 15px;
+          line-height: 1.5;
+          border: 1px solid #444;
+        }
+
+        /* Share Button Styles */
+        .direct-share-container {
+          display: flex;
+          justify-content: center;
+          gap: 15px;
+          margin: 20px auto;
+          padding: 0 15px;
+          max-width: 500px;
+        }
+
+        .share-option {
+          color: white;
+          text-decoration: none;
+          font-weight: bold;
+          padding: 12px 15px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          font-size: 14px;
+          transition: background-color 0.2s, transform 0.2s;
+          flex: 1;
+        }
+        .share-option:hover {
+            transform: scale(1.03);
+        }
+
+        .share-option.whatsapp { background-color: #25D366; }
+        .share-option.whatsapp:hover { background-color: #1EBE57; }
+        .share-option.telegram { background-color: #0088cc; }
+        .share-option.telegram:hover { background-color: #0077b6; }
+
+        /* Popup Styles */
+        .popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          display: none; /* Initially hidden */
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+          background: #1e1e1e;
+          padding: 30px;
+          border-radius: 12px;
+          text-align: center;
+          position: relative;
+          width: 90%;
+          max-width: 350px;
+          border: 1px solid #444;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .popup-content .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          font-size: 28px;
+          color: #888;
+          cursor: pointer;
+          transition: color 0.3s;
+        }
+
+        .popup-content .close-btn:hover {
+          color: #fff;
+        }
+
+        .popup-content svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .popup-content h3 {
+          margin-top: 0;
+          margin-bottom: 10px;
+          font-size: 22px;
+        }
+
+        .popup-content p {
+          margin-bottom: 25px;
+          color: #ccc;
+          font-size: 16px;
+        }
+
+        .popup-join-btn {
+          display: block;
+          width: 100%;
+          background: #0088cc;
+          color: #fff;
+          padding: 14px;
+          border-radius: 8px;
+          font-size: 18px;
+          font-weight: bold;
+          text-decoration: none;
+          transition: background 0.3s, transform 0.2s;
+        }
+
+        .popup-join-btn:hover {
+          background: #0077b6;
+          transform: scale(1.02);
+        }
+        
+        .popup-already-joined {
+          display: block;
+          margin-top: 12px;
+          color: #aaa;
+          text-decoration: none;
+          font-size: 14px;
+          opacity: 0.7;
+          cursor: pointer;
+          transition: opacity 0.3s;
+        }
+
+        .popup-already-joined:hover {
+          opacity: 1;
+        }
+    </style>
 </head>
-
 <body>
 
-    <div class="video-container" data-shaka-player-container shaka-controls="true">
-
-        <video autoplay data-shaka-player id="video" poster="https://placehold.co/1280x720/000000/FFFFFF?text=Loading+Player..." preload="auto"></video>
-
-    </div>
-
-
-
-    <a class="telegram-btn-strip" href="https://t.me/+OACGYQBHrIJmM2Y1" target="_blank">Join Telegram</a>
-
-
-
-    <div class="info-box">
-
-        Sharing is caring! If you enjoy this stream, please share it with your friends and family. It helps us a lot! ❤️
-
-    </div>
-
-
-
-    <div class="direct-share-container">
-
-        <a id="whatsappShare" class="share-option whatsapp" href="#" target="_blank">
-
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-
-                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.068-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-
-            </svg>
-
-            Share on WhatsApp
-
-        </a>
-
-        <a id="telegramShare" class="share-option telegram" href="#" target="_blank">
-
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/>
-
-            </svg>
-
-            Share on Telegram
-
-        </a>
-
-    </div>
-
-
-
-    <div id="telegramPopup" class="popup-overlay">
-
-        <div class="popup-content">
-
-            <span class="close-btn" onclick="closePopup()">&times;</span>
-
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="32" fill="#37AEE2"></circle><path d="M46 17L18 28.5385L28.5 33.5M46 17L35.5 48L28.5 33.5M46 17L28.5 33.5" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-
-            <h3>Join Our Community</h3>
-
-            <p>Stay updated with the latest content by joining our Telegram channel.</p>
-
-            <a class="popup-join-btn" href="https://t.me/+OACGYQBHrIJmM2Y1" target="_blank" onclick="closePopup()">Join Now</a>
-
-            <a class="popup-already-joined" onclick="closePopup()">Already Joined</a>
-
-        </div>
-
-    </div>
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-
-
-
-    <script>
-
-        // Anti-inspection script
-
-        (function() {
-
-            // Disable right-click
-
-            document.addEventListener('contextmenu', event => event.preventDefault());
-
-
-
-            // Disable DevTools shortcuts
-
-            document.addEventListener('keydown', event => {
-
-                if (event.keyCode === 123 || (event.ctrlKey && event.shiftKey && event.keyCode === 73)) {
-
-                    event.preventDefault();
-
-                }
-
-            });
-
-
-
-            // Detect if DevTools is open
-
-            const devToolsCheck = setInterval(function() {
-
-                const threshold = 160;
-
-                if (window.outerWidth - window.innerWidth > threshold ||
-
-                    window.outerHeight - window.innerHeight > threshold) {
-
-                    document.body.innerHTML = '<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:white; display:flex; justify-content:center; align-items:center; font-family: sans-serif; font-size: 24px;">Developer Tools are not allowed.</div>';
-
-                    clearInterval(devToolsCheck);
-
-                }
-
-            }, 1000);
-
-        })();
-
-
-
-        const popup = document.getElementById('telegramPopup');
-
-
-
-        // --- Popup Logic ---
-
-        function showPopup() {
-
-            popup.style.display = 'flex';
-
-        }
-
-
-
-        function closePopup() {
-
-            popup.style.display = 'none';
-
-        }
-
-
-
-        popup.addEventListener('click', function(event) {
-
-            if (event.target === popup) {
-
-                closePopup();
-
-            }
-
-        });
-
-
-
-        // --- Share Button Logic ---
-
-        function updateShareLinks() {
-
-            const link = window.location.href; // Share the page URL
-
-            const encodedLink = encodeURIComponent(link);
-
-            const shareText = encodeURIComponent("Hey! Check out this awesome live stream I found:");
-
-
-
-            const whatsappLink = `https://api.whatsapp.com/send?text=${shareText}%20${encodedLink}`;
-
-            const telegramLink = `https://t.me/share/url?url=${encodedLink}&text=${shareText}`;
-
-
-
-            document.getElementById('whatsappShare').href = whatsappLink;
-
-            document.getElementById('telegramShare').href = telegramLink;
-
-        }
-
-
-
-        // Shaka player initialization script
-
-        let player, ui;
-
-
-
-        // --- Custom Telegram Button for Shaka UI ---
-
-        class TelegramButton extends shaka.ui.Element {
-
-            constructor(parent, controls) {
-
-                super(parent, controls);
-
-                const button = document.createElement('button');
-
-                button.className = 'shaka-button';
-
-                button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>`;
-
-                button.setAttribute('aria-label', 'Join Telegram');
-
-                this.eventManager.listen(button, 'click', () => {
-
-                    window.open('https://t.me/+q1P8ArfVAlU1YzZl', '_blank');
-
-                });
-
-                this.parent.appendChild(button);
-
-            }
-
-        }
-
-        TelegramButton.Factory = class {
-
-            create(rootElement, controls) {
-
-                return new TelegramButton(rootElement, controls);
-
-            }
-
-        };
-
-        shaka.ui.Controls.registerElement('telegram', new TelegramButton.Factory());
-
-        // --- End of Custom Button ---
-
-
-
-        async function init() {
-
-            const video = document.getElementById("video");
-
-            ui = video.ui;
-
-            const controls = ui.getControls();
-
-            player = controls.getPlayer();
-
-            window.player = player;
-
-
-
-            // --- Configure the UI with new colors and buttons ---
-
-            ui.configure({
-
-                controlPanelElements: [
-
-                    "play_pause", "mute", "volume", "time_and_duration", "spacer",
-
-                    "quality", "telegram", "picture_in_picture",
-
-                    "fullscreen"
-
-                ],
-
-                // overflowMenuButtons: ['captions', 'language', 'cast'], // This line is removed
-
-                volumeBarColors: { base: "rgba(255, 0, 150, 0.7)", level: "rgba(0, 204, 255, 0.7)" },
-
-                seekBarColors: {
-
-                    base: 'rgba(255,255,255,0.15)',
-
-                    buffered: 'rgba(0,255,0,0.7)',
-
-                    played: 'rgba(255,0,255,0.7)'
-
-                }
-
-            });
-
-            player.addEventListener("error", onPlayerErrorEvent);
-
-            controls.addEventListener("error", onUIErrorEvent);
-
-
-
-            // --- Player Configuration ---
+    <!-- Shaka Player container -->
+    <div class="video-container" data-shaka-player-container shaka-controls="true">
+        <video autoplay data-shaka-player id="video" muted poster="https://placehold.co/1280x720/000000/FFFFFF?text=Loading+Player..." preload="auto"></video>
+    </div>
+
+    <a class="telegram-btn-strip" href="https://t.me/+OACGYQBHrIJmM2Y1" target="_blank">Join Telegram</a>
+
+    <div class="info-box">
+      Sharing is caring! If you enjoy this stream, please share it with your friends and family. It helps us a lot! ❤️
+    </div>
+  
+    <div class="direct-share-container">
+      <a id="whatsappShare" class="share-option whatsapp" href="#" target="_blank">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.068-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+          </svg>
+          Share on WhatsApp
+      </a>
+      <a id="telegramShare" class="share-option telegram" href="#" target="_blank">
+           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/>
+          </svg>
+          Share on Telegram
+      </a>
+    </div>
+
+    <!-- Popup HTML Structure -->
+    <div id="telegramPopup" class="popup-overlay">
+      <div class="popup-content">
+        <span class="close-btn" onclick="closePopup()">&times;</span>
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="32" fill="#37AEE2"></circle><path d="M46 17L18 28.5385L28.5 33.5M46 17L35.5 48L28.5 33.5M46 17L28.5 33.5" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <h3>Join Our Community</h3>
+        <p>Stay updated with the latest content by joining our Telegram channel.</p>
+        <a class="popup-join-btn" href="https://t.me/+OACGYQBHrIJmM2Y1" target="_blank" onclick="closePopup()">Join Now</a>
+        <a class="popup-already-joined" onclick="closePopup()">Already Joined</a>
+      </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        // Anti-inspection script
+        (function() {
+          // Disable right-click
+          document.addEventListener('contextmenu', event => event.preventDefault());
+
+          // Disable DevTools shortcuts
+          document.addEventListener('keydown', event => {
+            if (event.keyCode === 123 || (event.ctrlKey && event.shiftKey && event.keyCode === 73)) {
+              event.preventDefault();
+            }
+          });
+
+          // Detect if DevTools is open
+          const devToolsCheck = setInterval(function() {
+            const threshold = 160;
+            if (window.outerWidth - window.innerWidth > threshold || 
+                window.outerHeight - window.innerHeight > threshold) {
+              document.body.innerHTML = '<div style="position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:white; display:flex; justify-content:center; align-items:center; font-family: sans-serif; font-size: 24px;">Developer Tools are not allowed.</div>';
+              clearInterval(devToolsCheck);
+            }
+          }, 1000);
+        })();
+
+        const popup = document.getElementById('telegramPopup');
+
+        // --- Popup Logic ---
+        function showPopup() {
+            popup.style.display = 'flex';
+        }
+
+        function closePopup() {
+            popup.style.display = 'none';
+        }
+        
+        popup.addEventListener('click', function(event) {
+            if (event.target === popup) {
+                closePopup();
+            }
+        });
+
+        // --- Share Button Logic ---
+        function updateShareLinks() {
+            const link = window.location.href; // Share the page URL
+            const encodedLink = encodeURIComponent(link);
+            const shareText = encodeURIComponent("Hey! Check out this awesome live stream I found:");
+
+            const whatsappLink = `https://api.whatsapp.com/send?text=${shareText}%20${encodedLink}`;
+            const telegramLink = `https://t.me/share/url?url=${encodedLink}&text=${shareText}`;
+
+            document.getElementById('whatsappShare').href = whatsappLink;
+            document.getElementById('telegramShare').href = telegramLink;
+        }
+
+        // Shaka player initialization script
+        let player, ui;
+        
+        async function init() {
+            const video = document.getElementById("video");
+            ui = video.ui;
+            const controls = ui.getControls();
+            player = controls.getPlayer();
+            window.player = player;
+            ui.configure({
+                controlPanelElements: [
+                    "play_pause", "mute", "volume", "spacer",
+                    "time_and_duration", "picture_in_picture",
+                    "fullscreen", "overflow_menu"
+                ],
+                volumeBarColors: { base: "rgba(255, 0, 150, 0.7)", level: "rgba(0, 204, 255, 0.7)" },
+                seekBarColors: { base: "rgba(0, 204, 255, 0.7)", buffered: "rgba(255, 0, 150, 0.7)", played: "rgba(0, 204, 255, 0.7)" }
+            });
+            player.addEventListener("error", onPlayerErrorEvent);
+            controls.addEventListener("error", onUIErrorEvent);
+            
+              // --- Player Configuration ---
 
             const mpdUrl = 'https://sundirectgo-live.pc.cdn.bitgravity.com/hd21/dth.mpd';
 
@@ -751,45 +345,26 @@
             const key = '0f578151bc9f90a9b77677686ded4f9b';
 
 
+            
+            player.configure({ drm: { clearKeys: { [kid]: key } } });
+            try {
+                await player.load(mpdUrl);
+                console.log("✅ Video loaded successfully!");
+            } catch (e) { onPlayerError(e); }
 
-            player.configure({ drm: { clearKeys: { [kid]: key } } });
-
-            try {
-
-                await player.load(mpdUrl);
-
-                console.log("✅ Video loaded successfully!");
-
-            } catch (e) { onPlayerError(e); }
-
-
-
-            // --- Initialize UI Features After Player Loads ---
-
-            updateShareLinks();
-
-            setTimeout(showPopup, 1500); // Show popup after 1.5 seconds
-
-        }
-
-
-
-        function onPlayerErrorEvent(errorEvent) { onPlayerError(errorEvent.detail); }
-
-        function onPlayerError(error) { console.error("🚫 Shaka Player Error", error); }
-
-        function onUIErrorEvent(errorEvent) { onPlayerError(errorEvent.detail); }
-
-        document.addEventListener("shaka-ui-loaded", init);
-
-    </script>
-
-
-
-    <a href="https://www.freecounterstat.com" title="website hits counter"><img src="https://counter4.optistats.ovh/private/freecounterstat.php?c=h39cnaqxrdaeatb6lbmyly49lw2tf743" border="0" title="website hits counter" alt="website hits counter" style="position: fixed; bottom: 5px; right: 5px; opacity: 0.7;"></a>
-
-
+            // --- Initialize UI Features After Player Loads ---
+            updateShareLinks();
+            setTimeout(showPopup, 1500); // Show popup after 1.5 seconds
+        }
+        
+        function onPlayerErrorEvent(errorEvent) { onPlayerError(errorEvent.detail); }
+        function onPlayerError(error) { console.error("🚫 Shaka Player Error", error); }
+        function onUIErrorEvent(errorEvent) { onPlayerError(errorEvent.detail); }
+        document.addEventListener("shaka-ui-loaded", init);
+    </script>
+    
+    <!-- Counter -->
+    <a href="https://www.freecounterstat.com" title="website hits counter"><img src="https://counter4.optistats.ovh/private/freecounterstat.php?c=h39cnaqxrdaeatb6lbmyly49lw2tf743" border="0" title="website hits counter" alt="website hits counter" style="position: fixed; bottom: 5px; right: 5px; opacity: 0.7;"></a>
 
 </body>
-
 </html>
