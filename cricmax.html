@@ -1,6 +1,4 @@
-<!--
-
---><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -338,12 +336,15 @@
             player.addEventListener("error", onPlayerErrorEvent);
             controls.addEventListener("error", onUIErrorEvent);
             
-            // --- Player Configuration ---
-             const mpdUrl = 'https://ev-fast-mpd.starzplayarabia.com/live/eds/CricLifeMax/DASH/CricLifeMax.mp';
+              // --- Player Configuration ---
+
+            const mpdUrl = 'https://ev-fast-mpd.starzplayarabia.com/live/eds/CricLifeMax/DASH/CricLifeMax.mpd';
 
             const kid = 'ad59b720bd4b44d063686212b99484b5';
 
-            const key = 'e1744990edf98acc729c0773a3766583';
+            const key = '1744990edf98acc729c0773a3766583e';
+
+
             
             player.configure({ drm: { clearKeys: { [kid]: key } } });
             try {
