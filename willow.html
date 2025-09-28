@@ -1,6 +1,4 @@
-<!--
-
---><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -227,7 +225,7 @@
         <video autoplay data-shaka-player id="video" muted poster="https://placehold.co/1280x720/000000/FFFFFF?text=Loading+Player..." preload="auto"></video>
     </div>
 
-    <a class="telegram-btn-strip" href="https://t.me/+q1P8ArfVAlU1YzZl" target="_blank">Join Telegram</a>
+    <a class="telegram-btn-strip" href="https://t.me/+OACGYQBHrIJmM2Y1" target="_blank">Join Telegram</a>
 
     <div class="info-box">
       Sharing is caring! If you enjoy this stream, please share it with your friends and family. It helps us a lot! ❤️
@@ -255,7 +253,7 @@
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="32" fill="#37AEE2"></circle><path d="M46 17L18 28.5385L28.5 33.5M46 17L35.5 48L28.5 33.5M46 17L28.5 33.5" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         <h3>Join Our Community</h3>
         <p>Stay updated with the latest content by joining our Telegram channel.</p>
-        <a class="popup-join-btn" href="https://t.me/+q1P8ArfVAlU1YzZl" target="_blank" onclick="closePopup()">Join Now</a>
+        <a class="popup-join-btn" href="https://t.me/+OACGYQBHrIJmM2Y1" target="_blank" onclick="closePopup()">Join Now</a>
         <a class="popup-already-joined" onclick="closePopup()">Already Joined</a>
       </div>
     </div>
@@ -338,10 +336,15 @@
             player.addEventListener("error", onPlayerErrorEvent);
             controls.addEventListener("error", onUIErrorEvent);
             
-            // --- Player Configuration ---
-            const mpdUrl = 'https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/dash/enc/wf8usag51e/out/v1/bd3b0c314fff4bb1ab4693358f3cd2d3/cenc.mpd';
-            const kid = '5deb190b1dac28e46c0bdada7668b7de';
-            const key = 'ddd2b372702e42b0d2708a70b91dec8d';
+              // --- Player Configuration ---
+
+            const mpdUrl = 'https://a168aivottlinear-a.akamaihd.net/IAD/lhr-nitro/clients/dash/enc/llriqg36oy/out/v1/d5d0b76a4cab4567888ffea90cc42a2c/cenc.mpd';
+
+            const kid = '31f91da574d667855834640e323f647d';
+
+            const key = '044dbc740ad84f6069277a6cabd76adf';
+
+
             
             player.configure({ drm: { clearKeys: { [kid]: key } } });
             try {
